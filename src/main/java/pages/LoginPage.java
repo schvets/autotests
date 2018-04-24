@@ -12,14 +12,14 @@ import static com.codeborne.selenide.Selenide.$x;
 
 @Getter
 public class LoginPage {
-    private SelenideElement userEmail = $(By.id("email"));
-    private SelenideElement userPassword = $(By.id("pass"));
-    private SelenideElement acceptButton = $x("//div[@class='hidden-xs col2-set']//button[@id='send2']");
-    private SelenideElement errorLabel = $(byClassName("error-msg"));
+    private SelenideElement userEmail = $(By.name("email"));
+    private SelenideElement userPassword = $(By.name("password"));
+    private SelenideElement acceptButton = $x("//div[@class='btn-default form__login__submit form__submit']");
+    private SelenideElement errorLabel = $x("//div[@class='login__errortext login--modal__response-error']");
 
 
     public LoginPage open() {
-        Selenide.open("/customer/account/login/");
+        Selenide.open("/login/");
         return this;
     }
 

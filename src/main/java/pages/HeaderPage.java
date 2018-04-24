@@ -12,7 +12,7 @@ import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 
 public class HeaderPage {
-    private ElementsCollection menuLabels = $$x("//div[@class='nav-container']//li//span");
+    private ElementsCollection menuLabels = $$x("//*//a");
     private SelenideElement header = $(By.id("header")),
             searchInput = header.$(By.id("ui-id-1")),
             titleLogo = header.$x("//*[@class='header-left']//img"),
@@ -22,8 +22,9 @@ public class HeaderPage {
             basketButton = $(By.className("basket-icon"));
 
     public void goTo(Menu menu) {
-        final Actions action = Selenide.actions();
-        menu.getLevels().forEach(el -> action.moveToElement($$(byText(el)).filter(Condition.visible).first()));
-        action.click().build().perform();
+        menu.getLevels().forEach(el -> menuLabels
+                .filter(Condition.visible)
+                .find(Condition.exactText(el))
+                .click());
     }
 }
