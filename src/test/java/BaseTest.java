@@ -1,15 +1,27 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.WebDriverRunner;
+
 import entities.Menu;
 import entities.User;
 import org.aeonbits.owner.ConfigFactory;
 import org.assertj.core.api.SoftAssertions;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import pages.*;
 import testDataStorage.UserStorage;
 import utils.IConfigurationVariables;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -26,14 +38,14 @@ public class BaseTest {
     private final ModalPage modalPage = new ModalPage();
 
 
-    @BeforeMethod
+    @BeforeMethod (alwaysRun = true)
     public void setUp() {
         Configuration.baseUrl = configVariables.baseUrl();
         Configuration.browser = configVariables.currentBrowser();
         WebDriverRunner.getWebDriver().manage().deleteAllCookies();
     }
 
-    @Test (enabled = false)
+    @Test(enabled = false)
     public void registerNewUserTest() {
         registerPage.open();
         registerPage.registerNewUser(new UserStorage().getUniqueUser());
@@ -77,7 +89,7 @@ public class BaseTest {
                 .describedAs("wrong error message");
     }
 
-    @Test (enabled = false)
+    @Test(enabled = false)
     public void loginUserTestBlock() {
         loginPage.open();
         loginPage.blockAccount(User.builder().email(new UserStorage().getRealUserForBlock()
@@ -111,4 +123,6 @@ public class BaseTest {
                 .describedAs("incorrect page url");
         softly.assertAll();
     }
+
+
 }

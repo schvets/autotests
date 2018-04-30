@@ -16,6 +16,7 @@ public class LoginPage {
     private SelenideElement userPassword = $(By.name("password"));
     private SelenideElement acceptButton = $x("//div[@class='btn-default form__login__submit form__submit']");
     private SelenideElement errorLabel = $x("//div[@class='login__errortext login--modal__response-error']");
+    private SelenideElement token = $x("//input[@name=\"_token\"]");
 
 
     public LoginPage open() {
@@ -44,4 +45,9 @@ public class LoginPage {
     private boolean isModalVisible() {
         return new ModalPage().getModalBody().isDisplayed();
     }
+
+    public String getToken() {
+        return token.getValue();
+    }
+
 }

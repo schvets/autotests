@@ -25,4 +25,7 @@ public interface IConfigurationVariables extends Config{
     String blockUserEmail();
     String blockUserBirthDate();
     String blockUserPassword();
+
+    String authorisePath();
+    String customerPath();
 }
