@@ -1,31 +1,21 @@
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.WebDriverRunner;
-
 import entities.Menu;
 import entities.User;
 import org.aeonbits.owner.ConfigFactory;
 import org.assertj.core.api.SoftAssertions;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import pages.*;
 import testDataStorage.UserStorage;
 import utils.IConfigurationVariables;
+import utils.RestUtils;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selenide.refresh;
+import static com.codeborne.selenide.Selenide.title;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class BaseTest {
@@ -35,7 +25,8 @@ public class BaseTest {
     private final MyAccountPage myAccountPage = new MyAccountPage();
     private final LoginPage loginPage = new LoginPage();
     private final MainPage mainPage = new MainPage();
-    private final ModalPage modalPage = new ModalPage();
+    private final RestUtils restUtils = new RestUtils();
+    private final CartPage cartPage = new CartPage();
 
 
     @BeforeMethod (alwaysRun = true)
@@ -57,6 +48,23 @@ public class BaseTest {
         loginPage.open();
         User expectedUser = new UserStorage().getRealUser();
         loginPage.loginAs(expectedUser);
+        User actualUser = myAccountPage.getUserData();
+        SoftAssertions softly = new SoftAssertions();
+//        softly.assertThat(expectedUser.getPrefix()).isEqualTo(actualUser.getPrefix())
+//                .describedAs("incorrect user sex");
+        softly.assertThat(expectedUser.getFirstName()).isEqualTo(actualUser.getFirstName())
+                .describedAs("incorrect user first name");
+        softly.assertThat(expectedUser.getLastName()).isEqualTo(actualUser.getLastName())
+                .describedAs("incorrect user second name");
+        softly.assertAll();
+    }
+
+    @Test
+    public void loginUserTestPositiveViaRest() {
+        loginPage.open();
+        User expectedUser = new UserStorage().getRealUser();
+        restUtils.loginViaRest(loginPage.getToken(),expectedUser);
+        refresh();
         User actualUser = myAccountPage.getUserData();
         SoftAssertions softly = new SoftAssertions();
 //        softly.assertThat(expectedUser.getPrefix()).isEqualTo(actualUser.getPrefix())
@@ -124,5 +132,48 @@ public class BaseTest {
         softly.assertAll();
     }
 
+
+    @DataProvider
+    public Object[][] loginFormValidation() {
+        return new Object[][]{
+                {User.builder().email("").password("").build(),
+                        "Bitte gib Deine E-Mail-Adresse ein.","Bitte gib Dein Passwort ein."},
+                {User.builder().email("1").password("1").build(),
+                        "Bitte gib Deine E-Mail-Adresse im richtigen Format ein.",
+                        "Das Passwort muss mindestens 8 Zeichen lang sein und mindestens eine Zahl enthalten."}
+        };
+    }
+
+
+    @Test(dataProvider = "loginFormValidation")
+    public void validationTestFront(User user, String expMsgLogin, String expMsgPassword ) {
+        loginPage.open();
+        loginPage.loginAs(user);
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(loginPage.getEmailError()).isEqualTo(expMsgLogin)
+                .describedAs("incorrect Email Error");
+        softly.assertThat(loginPage.getPasswordError()).isEqualTo(expMsgPassword)
+                .describedAs("incorrect Password Error");
+        softly.assertAll();
+
+    }
+
+    @Test
+    public void addToProductCartViaRestTest() {
+        loginPage.open();
+        User expectedUser = new UserStorage().getRealUser();
+        restUtils.loginViaRest(loginPage.getToken(),expectedUser);
+        refresh();
+        restUtils.addProductToCart("913" );
+        cartPage.open();
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(cartPage.getItemProducer()).isEqualToIgnoringCase("MICHAEL KORS")
+                .describedAs("incorrect Producer");
+        softly.assertThat(cartPage.getItemDesc()).isEqualToIgnoringCase("BLAKELY MEDIUM BUCKET BAG TILE BLUE")
+                .describedAs("incorrect Description");
+        softly.assertThat(cartPage.getItemPrice()).isEqualTo("394 €")
+                .describedAs("incorrect price");
+        softly.assertAll();
+    }
 
 }

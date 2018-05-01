@@ -6,7 +6,7 @@ import entities.User;
 import lombok.Getter;
 import org.openqa.selenium.By;
 
-import static com.codeborne.selenide.Selectors.byClassName;
+import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$x;
 
@@ -16,11 +16,13 @@ public class LoginPage {
     private SelenideElement userPassword = $(By.name("password"));
     private SelenideElement acceptButton = $x("//div[@class='btn-default form__login__submit form__submit']");
     private SelenideElement errorLabel = $x("//div[@class='login__errortext login--modal__response-error']");
-    private SelenideElement token = $x("//input[@name=\"_token\"]");
+    private SelenideElement token = $x("//input[@name='_token']");
+    private SelenideElement emailError = $(byId("email-error"));
+    private SelenideElement passwordError = $(byId("password-error"));
 
 
     public LoginPage open() {
-        Selenide.open("/login/");
+        Selenide.open("/login");
         return this;
     }
 
@@ -48,6 +50,14 @@ public class LoginPage {
 
     public String getToken() {
         return token.getValue();
+    }
+
+    public String getEmailError() {
+        return emailError.getText();
+    }
+
+    public String getPasswordError() {
+        return passwordError.getText();
     }
 
 }

@@ -3,50 +3,75 @@ package utils;
 import com.codeborne.selenide.WebDriverRunner;
 import entities.User;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.aeonbits.owner.ConfigFactory;
 import org.openqa.selenium.Cookie;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.codeborne.selenide.Selenide.open;
-import static io.restassured.RestAssured.given;
+import java.util.Set;
 
 
 public class RestUtils {
-    public void loginViaRest(String token, User user){
-        Map<String,String> userCred = new HashMap<>();
-        userCred.put("_token", "64T1kBRJwSMAIj19iYypDevXjKIDxiful49HdU1b");
-        userCred.put("email", user.getEmail());
-        userCred.put("password", user.getPassword());
+    IConfigurationVariables configVariables = ConfigFactory.create(IConfigurationVariables.class, System.getProperties());
 
-        RestAssured.baseURI = "https://www.fashionette.de";
+    public void loginViaRest(String token, User user) {
+        RestAssured.baseURI = configVariables.baseUrl();
 
-//        given()
-//                .contentType("application/x-www-form-urlencoded")
-//                .body(userCred)
-//                .when().post("/account/authorise").then()
-//                .statusCode(200);
-
-        given().contentType("application/x-www-form-urlencoded").headers(userCred)
-                .when().post("/account/authorise").then().statusCode(302);
-
-//        given().contentType("application/x-www-form-urlencoded").headers(userCred)
-//                .when().post("/account/authorise").getCookies();
-
-        Map<String, String> cookies = given().contentType("application/x-www-form-urlencoded")
-                .when().get("/account/customer").getCookies();
-
-        Cookie ck = new Cookie("reference_id", cookies.get("reference_id"));
-        Cookie ck1 = new Cookie("XSRF-TOKEN", cookies.get("XSRF-TOKEN"));
-        Cookie ck2 = new Cookie("laravel_session", cookies.get("laravel_session"));
-
-        WebDriverRunner.getWebDriver().manage().addCookie(ck);
-        WebDriverRunner.getWebDriver().manage().addCookie(ck1);
-        WebDriverRunner.getWebDriver().manage().addCookie(ck2);
-
-        open("/account/customer");
-
-}
+        RestAssured.given().contentType(ContentType.URLENC).
+                formParam("_token", token)
+                .formParam("email", user.getEmail())
+                .formParam("password", user.getPassword())
+                .cookies(getCookiesWd())
+                .request()
+                .post(configVariables.authorisePath());
+    }
 
 
+    public static Map<String, String> getCookiesWd(){
+        Map<String, String> result = new HashMap<>();
+        Set<Cookie> cookies = WebDriverRunner.getWebDriver().manage().getCookies();
+        for (Cookie cookie : cookies) {
+            result.put(cookie.getName(), cookie.getValue());
+        }
+        return result;
+    }
+
+
+    public String getTokenViaRest() {
+        Response response = RestAssured.given().get(configVariables.baseUrl());
+        String responseBody = response.getBody().asString();
+        String pattern = "window.csrfToken = ";
+        int patternLen = pattern.length();
+        final int tokenLen = 42;
+        return responseBody.substring(
+                responseBody.indexOf(pattern) + patternLen,
+                responseBody.indexOf(pattern) + patternLen + tokenLen)
+                .replace("'","");
+    }
+
+
+    public void addProductToCart(String productSku) {
+        RestAssured.baseURI = configVariables.baseUrl();
+
+        RestAssured.given().contentType(ContentType.ANY).get(configVariables.productPath()).cookies();
+
+        Response responce = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("_token", getTokenViaRest())
+                .formParam("super_attribute%5B261%5D", productSku)
+                .cookies(getCookiesWd())
+                .request()
+                .post(configVariables.productPath());
+
+        responce.getCookies();
+        responce.getStatusCode();
+
+
+    }
+
+    public Map<String, String> getCookiesRest() {
+        RestAssured.baseURI = configVariables.baseUrl();
+        return RestAssured.given().contentType(ContentType.TEXT).get(configVariables.customerPath()).getCookies();
+    }
 }

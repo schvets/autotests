@@ -30,7 +30,7 @@ public class RegisterPage {
 
 
     public RegisterPage open() {
-        Selenide.open("/customer/account/create/");
+        Selenide.open("/customer/account/create");
         return this;
     }
 

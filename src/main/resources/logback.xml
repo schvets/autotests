@@ -24,10 +24,9 @@
 
 
     <!-- By default, the level of the root level is set to DEBUG -->
-    <root level="DEBUG">
+    <root level="OFF">
         <appender-ref ref="RP"/>
         <appender-ref ref="STDOUT"/>
     </root>
-
 
 </configuration>
