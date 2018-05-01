@@ -29,4 +29,5 @@ public interface IConfigurationVariables extends Config{
     String authorisePath();
     String customerPath();
     String productPath();
+    String baseEndPoint();
 }

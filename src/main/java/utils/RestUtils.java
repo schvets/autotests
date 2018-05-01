@@ -65,10 +65,7 @@ public class RestUtils {
                 .post(configVariables.productPath());
 
         responce.getCookies();
-        responce.getStatusCode();
-
-
-    }
+        responce.getStatusCode(); }
 
     public Map<String, String> getCookiesRest() {
         RestAssured.baseURI = configVariables.baseUrl();
