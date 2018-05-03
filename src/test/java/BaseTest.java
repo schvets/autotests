@@ -10,7 +10,8 @@ import org.testng.annotations.Test;
 import pages.*;
 import testDataStorage.UserStorage;
 import utils.IConfigurationVariables;
-import utils.RestUtils;
+import utils.RestUtilsFashion;
+import utils.SelenoidWebDriverProvider;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.refresh;
@@ -25,15 +26,16 @@ public class BaseTest {
     private final MyAccountPage myAccountPage = new MyAccountPage();
     private final LoginPage loginPage = new LoginPage();
     private final MainPage mainPage = new MainPage();
-    private final RestUtils restUtils = new RestUtils();
+    private final RestUtilsFashion restUtils = new RestUtilsFashion();
     private final CartPage cartPage = new CartPage();
 
 
     @BeforeMethod (alwaysRun = true)
     public void setUp() {
+        Configuration.browser = SelenoidWebDriverProvider.class.getName();
         Configuration.baseUrl = configVariables.baseUrl();
-        Configuration.browser = configVariables.currentBrowser();
         WebDriverRunner.getWebDriver().manage().deleteAllCookies();
+
     }
 
     @Test(enabled = false)
@@ -120,7 +122,7 @@ public class BaseTest {
         };
     }
 
-    @Test(dataProvider = "menuLevels")
+    @Test(dataProvider = "menuLevels", enabled = false)
     public void menuTransitionTest(Menu menu) {
         mainPage.open();
         mainPage.getHeader().goTo(menu);

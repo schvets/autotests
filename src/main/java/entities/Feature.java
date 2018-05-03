@@ -11,19 +11,19 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class Page {
-    @SerializedName("_id")
-    @Expose
-    private String id;
-    @SerializedName("isTest")
-    @Expose
-    private Boolean isTest;
+public class Feature {
     @SerializedName("title")
     @Expose
     private String title;
-    @SerializedName("__v")
+    @SerializedName("isTest")
     @Expose
-    private Integer v;
+    private Boolean isTest;
+    @SerializedName("status")
+    @Expose
+    private Integer status;
+    @SerializedName("_id")
+    @Expose
+    private String id;
     @SerializedName("features")
     @Expose
     private List<Feature> features = null;

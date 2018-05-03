@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class RestUtils {
+public class RestUtilsFashion {
     IConfigurationVariables configVariables = ConfigFactory.create(IConfigurationVariables.class, System.getProperties());
 
     public void loginViaRest(String token, User user) {
@@ -71,4 +71,6 @@ public class RestUtils {
         RestAssured.baseURI = configVariables.baseUrl();
         return RestAssured.given().contentType(ContentType.TEXT).get(configVariables.customerPath()).getCookies();
     }
+
+
 }

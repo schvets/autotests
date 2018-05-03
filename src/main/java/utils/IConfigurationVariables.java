@@ -30,4 +30,8 @@ public interface IConfigurationVariables extends Config{
     String customerPath();
     String productPath();
     String baseEndPoint();
+    String selenoidHubUrl();
+    Boolean enableVNCFlag();
+    String browserVersion();
+    String addPagePath();
 }
