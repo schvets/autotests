@@ -65,45 +65,6 @@ public class ApiTests {
     }
 
 
-//    @Test
-//    public void addFeatureTest(){
-//        Page expectedPage = elementStorage.getUniquePage();
-//        List<Page> expectedFeatureList = new ArrayList<>();
-//        expectedFeatureList.add(elementStorage.getUniqueFeature());
-//        restUtilsMultiVision.addPage(expectedPage);
-//        Page pageForAddFeature = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
-//
-//        restUtilsMultiVision.addFeature(pageForAddFeature,expectedFeatureList);
-//
-//        Page actualPage = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
-//        assertThat(actualPage.getFeatures())
-//                .extracting("title", "isTest", "features")
-//                .contains(Tuple.tuple(
-//                        expectedFeatureList.get(0).getTitle(),
-//                        expectedFeatureList.get(0).getIsTest(),
-//                        expectedFeatureList.get(0).getFeatures()));
-//    }
-//
-//    @Test
-//    public void addTestCaseTest(){
-//        Page expectedPage = elementStorage.getUniquePage();
-//        List<Page> expectedTestList = new ArrayList<>();
-//        expectedTestList.add(elementStorage.getUniqueTestCase());
-//        restUtilsMultiVision.addPage(expectedPage);
-//        Page pageForAddTest = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
-//
-//        restUtilsMultiVision.addTestCase(pageForAddTest,expectedTestList);
-//
-//        Page actualPage = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
-//        assertThat(actualPage.getFeatures())
-//                .extracting("title", "isTest", "features")
-//                .contains(Tuple.tuple(
-//                        expectedTestList.get(0).getTitle(),
-//                        expectedTestList.get(0).getIsTest(),
-//                        expectedTestList.get(0).getFeatures()));
-//    }
-
-
     @DataProvider
     public Object[][] elementsProvider() {
         return new Object[][]{
@@ -127,7 +88,6 @@ public class ApiTests {
                         expectedElementList.get(0).getTitle(),
                         expectedElementList.get(0).getIsTest(),
                         expectedElementList.get(0).getFeatures()));
-
     }
 }
 
