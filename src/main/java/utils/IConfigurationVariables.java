@@ -33,5 +33,5 @@ public interface IConfigurationVariables extends Config{
     String selenoidHubUrl();
     Boolean enableVNCFlag();
     String browserVersion();
-    String addPagePath();
+    String pagePath();
 }

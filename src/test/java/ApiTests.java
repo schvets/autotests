@@ -1,23 +1,27 @@
-import entities.Feature;
 import entities.Page;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
+import org.assertj.core.groups.Tuple;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import testDataStorage.MultiVisionEntityStorage;
 import utils.IConfigurationVariables;
 import utils.RestUtilsMultiVision;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
+
 
 public class ApiTests {
     IConfigurationVariables configVariables = ConfigFactory.create(IConfigurationVariables.class, System.getProperties());
     RestUtilsMultiVision restUtilsMultiVision = new RestUtilsMultiVision();
-
+    MultiVisionEntityStorage elementStorage = new MultiVisionEntityStorage();
 
     @BeforeTest
     public void setUp(){
@@ -26,24 +30,21 @@ public class ApiTests {
 
     @Test
     public void addPageApiTest(){
-        List<Feature> featuresArr = new ArrayList<>();
-        Page expectedPage = Page.builder().title("test add page call").isTest(false).features(featuresArr).build();
+        Page expectedPage = elementStorage.getUniquePage();
 
         Response responce = restUtilsMultiVision.addPage(expectedPage);
 
         responce.then().statusCode(200);
-        Page actualPage = responce.as(Page.class);
-        assertReflectionEquals(expectedPage , actualPage);
+        assertReflectionEquals(expectedPage , responce.as(Page.class));
     }
 
     @Test
     public void addPageApiTestMultiplyAssert(){
-        List<Feature> featuresArr = new ArrayList<>();
-        Page expectedPage = Page.builder().title("test add page call").isTest(false).features(featuresArr).build();
+        Page expectedPage = elementStorage.getUniquePage();
 
-        restUtilsMultiVision
-                .addPage(expectedPage)
-                .then()
+        Response result = restUtilsMultiVision.addPage(expectedPage);
+
+        result.then()
                 .statusCode(200)
                 .body("title", equalTo(expectedPage.getTitle()))
                 .body("features", equalTo(expectedPage.getFeatures()))
@@ -51,33 +52,82 @@ public class ApiTests {
     }
 
     @Test
-    public void addPageApiTestMultiplyккAssert(){
-        String result = RestAssured.given().get("/api/pages").thenReturn().body().asString();
-//        Page data = new Gson().fromJson(result, Page.class);
+    public void deletePageTest(){
+        Page expectedPage = elementStorage.getUniquePage();
+        restUtilsMultiVision.addPage(expectedPage);
+        Page pageForDelete = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
 
-//        Type collectionType = new TypeToken<Collection<Page>>(){}.getType();
-//        Collection<Page> data = new Gson().fromJson(result, collectionType);
+        restUtilsMultiVision.deletePage(pageForDelete);
 
-
+        assertThat(restUtilsMultiVision.getCurrentPagesList().contains(expectedPage))
+                .isEqualTo(false)
+                .as("page not deleted");
     }
 
 
-//Request URL: http://localhost:3030/api/pages?__v=0&_id=5aeb78bc41a98c55cfafe679&isTest=false&title=Page.9
+//    @Test
+//    public void addFeatureTest(){
+//        Page expectedPage = elementStorage.getUniquePage();
+//        List<Page> expectedFeatureList = new ArrayList<>();
+//        expectedFeatureList.add(elementStorage.getUniqueFeature());
+//        restUtilsMultiVision.addPage(expectedPage);
+//        Page pageForAddFeature = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
 //
-//Request URL: http://localhost:3030/tree
-//Request Method: GET
-//Status Code: 304 Not Modified
-//Remote Address: [::1]:3030
-//Referrer Policy: no-referrer-when-downgrade
+//        restUtilsMultiVision.addFeature(pageForAddFeature,expectedFeatureList);
 //
-//Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
-//Accept-Encoding: gzip, deflate, br
-//Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,uk;q=0.6
-//Cache-Control: max-age=0
-//Connection: keep-alive
-//Host: localhost:3030
-//If-None-Match: W/"c1b-jmB602rdg3W+6hAJ+sY4geZnA9s"
-//Upgrade-Insecure-Requests: 1
-//User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36
+//        Page actualPage = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
+//        assertThat(actualPage.getFeatures())
+//                .extracting("title", "isTest", "features")
+//                .contains(Tuple.tuple(
+//                        expectedFeatureList.get(0).getTitle(),
+//                        expectedFeatureList.get(0).getIsTest(),
+//                        expectedFeatureList.get(0).getFeatures()));
+//    }
+//
+//    @Test
+//    public void addTestCaseTest(){
+//        Page expectedPage = elementStorage.getUniquePage();
+//        List<Page> expectedTestList = new ArrayList<>();
+//        expectedTestList.add(elementStorage.getUniqueTestCase());
+//        restUtilsMultiVision.addPage(expectedPage);
+//        Page pageForAddTest = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
+//
+//        restUtilsMultiVision.addTestCase(pageForAddTest,expectedTestList);
+//
+//        Page actualPage = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
+//        assertThat(actualPage.getFeatures())
+//                .extracting("title", "isTest", "features")
+//                .contains(Tuple.tuple(
+//                        expectedTestList.get(0).getTitle(),
+//                        expectedTestList.get(0).getIsTest(),
+//                        expectedTestList.get(0).getFeatures()));
+//    }
 
+
+    @DataProvider
+    public Object[][] elementsProvider() {
+        return new Object[][]{
+                {elementStorage.getUniquePage(), elementStorage.getUniqueTestCase()},
+                {elementStorage.getUniquePage(), elementStorage.getUniqueFeature()}
+        };
+    }
+    @Test(dataProvider = "elementsProvider")
+    public void addElementOnPageTest(Page expectedPage, Page expectedElement ){
+        List<Page> expectedElementList = new ArrayList<>();
+        expectedElementList.add(expectedElement);
+        restUtilsMultiVision.addPage(expectedPage);
+        Page pageForAddElement = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
+
+        restUtilsMultiVision.addTestCase(pageForAddElement,expectedElementList);
+
+        Page actualPage = restUtilsMultiVision.getPageByTitle(expectedPage.getTitle());
+        assertThat(actualPage.getFeatures())
+                .extracting("title", "isTest", "features")
+                .contains(Tuple.tuple(
+                        expectedElementList.get(0).getTitle(),
+                        expectedElementList.get(0).getIsTest(),
+                        expectedElementList.get(0).getFeatures()));
+
+    }
 }
+
